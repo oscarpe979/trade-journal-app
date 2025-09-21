@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..crud import user as crud_user, models, schemas
+from ..crud import user as crud_user
+from .. import models
+from ..schemas import user as user_schema
 from ..core import security
-from ..database import SessionLocal, engine
-
-models.Base.metadata.create_all(bind=engine)
+from ..database.database import SessionLocal, engine
 
 router = APIRouter()
 
@@ -18,8 +18,8 @@ def get_db():
         db.close()
 
 
-@router.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@router.post("/users/", response_model=user_schema.User)
+def create_user(user: user_schema.UserCreate, db: Session = Depends(get_db)):
     db_user = crud_user.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
