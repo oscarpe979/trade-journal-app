@@ -2,19 +2,19 @@ from fastapi.testclient import TestClient
 from starlette import status
 
 # Helper function to create a user and get their token
-# def get_user_token(client: TestClient, email: str, password: str) -> str:
-#     # Create user
-#     client.post(
-#         "/api/v1/users/",
-#         json={"email": email, "password": password},
-#     )
-#     # Login and get token
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         data={"username": email, "password": password},
-#     )
-#     assert response.status_code == status.HTTP_200_OK
-#     return response.json()["access_token"]
+def get_user_token(client: TestClient, email: str, password: str) -> str:
+    # Create user
+    client.post(
+        "/api/v1/users/",
+        json={"email": email, "password": password},
+    )
+    # Login and get token
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={"username": email, "password": password},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    return response.json()["access_token"]
 
 # I. User Registration Tests
 def test_create_user(client: TestClient):
@@ -64,53 +64,53 @@ def test_create_user_missing_password(client: TestClient):
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-# # II. User Login/Authentication Tests
-# def test_login_for_access_token_success(client: TestClient):
-#     email = "login_success@example.com"
-#     password = "loginpassword"
-#     get_user_token(client, email, password) # Create user and get token
+# II. User Login/Authentication Tests
+def test_login_for_access_token_success(client: TestClient):
+    email = "login_success@example.com"
+    password = "loginpassword"
+    get_user_token(client, email, password) # Create user and get token
 
-# def test_login_for_access_token_wrong_password(client: TestClient):
-#     email = "wrong_pass@example.com"
-#     password = "correctpassword"
-#     get_user_token(client, email, password) # Create user
+def test_login_for_access_token_wrong_password(client: TestClient):
+    email = "wrong_pass@example.com"
+    password = "correctpassword"
+    get_user_token(client, email, password) # Create user
 
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         data={"username": email, "password": "wrongpassword"},
-#     )
-#     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-#     assert response.json() == {"detail": "Incorrect username or password"}
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={"username": email, "password": "wrongpassword"},
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Incorrect username or password"}
 
-# def test_login_for_access_token_non_existent_user(client: TestClient):
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         data={"username": "nonexistent@example.com", "password": "anypassword"},
-#     )
-#     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-#     assert response.json() == {"detail": "Incorrect username or password"}
+def test_login_for_access_token_non_existent_user(client: TestClient):
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={"username": "nonexistent@example.com", "password": "anypassword"},
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Incorrect username or password"}
 
-# def test_login_for_access_token_missing_username(client: TestClient):
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         data={"password": "anypassword"},
-#     )
-#     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+def test_login_for_access_token_missing_username(client: TestClient):
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={"password": "anypassword"},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-# def test_login_for_access_token_missing_password(client: TestClient):
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         data={"username": "test@example.com"},
-#     )
-#     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+def test_login_for_access_token_missing_password(client: TestClient):
+    response = client.post(
+        "/api/v1/login/access-token",
+        data={"username": "test@example.com"},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-# def test_login_for_access_token_invalid_form_data(client: TestClient):
-#     # Login endpoint expects form data, not JSON
-#     response = client.post(
-#         "/api/v1/login/access-token",
-#         json={"username": "test@example.com", "password": "testpassword"},
-#     )
-#     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY # FastAPI expects form data
+def test_login_for_access_token_invalid_form_data(client: TestClient):
+    # Login endpoint expects form data, not JSON
+    response = client.post(
+        "/api/v1/login/access-token",
+        json={"username": "test@example.com", "password": "testpassword"},
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY # FastAPI expects form data
 
 # # III. Protected Routes Tests
 # def test_read_users_me_success(client: TestClient):
