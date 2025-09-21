@@ -1,13 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 # Schema for creating a new user
 class UserCreate(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 # Schema for updating a user
 class UserUpdate(BaseModel):
-    email: str | None = None
+    email: EmailStr | None = None
     password: str | None = None
 
 # Schema for reading user data from the database

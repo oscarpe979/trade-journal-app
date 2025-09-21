@@ -3,3 +3,4 @@ uvicorn[standard]
 passlib[bcrypt]
 python-jose[cryptography]
 python-dotenv
+pydantic[email]
