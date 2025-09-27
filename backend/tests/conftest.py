@@ -12,7 +12,9 @@ from app.main import app
 from app.database.database import Base
 from app.routers.user import get_db
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+# Build the absolute path to the test database
+tests_dir = os.path.dirname(os.path.abspath(__file__))
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{os.path.join(tests_dir, 'test.db')}"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
