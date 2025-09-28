@@ -197,3 +197,13 @@ body {
   background-color: #2a2a2a;
   border-radius: 8px;
 }
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.8em;
+  margin-top: 5px;
+}
+
+.form-input.error {
+  border-color: #ff6b6b;
+}

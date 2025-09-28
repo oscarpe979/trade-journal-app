@@ -5,9 +5,15 @@ import '../App.css'; // Import the main CSS file for global styles
 const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+    setError('');
     // Handle sign-up logic here
     console.log('Sign-up attempt with:', { email, password });
   };
@@ -37,8 +43,9 @@ const SignUpPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="form-input"
+              className={`form-input ${error ? 'error' : ''}`}
             />
+            {error && <p className="error-message">{error}</p>}
           </div>
           <button type="submit" className="auth-button">Sign Up</button>
         </form>
