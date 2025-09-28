@@ -9,37 +9,36 @@ from sqlalchemy.orm import sessionmaker
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.main import app
-from app.database.database import Base
-from app.routers.user import get_db
+from app.database.database import Base, get_db
 
 # Build the absolute path to the test database
 tests_dir = os.path.dirname(os.path.abspath(__file__))
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{os.path.join(tests_dir, 'test.db')}"
+TESTING_DATABASE_URL = f"sqlite:///{os.path.join(tests_dir, 'test.db')}"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(TESTING_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope="module")
-def setup_database():
+@pytest.fixture(scope="function")
+def db_session():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
-    yield
-
-def override_get_db():
+    
+    db = TestingSessionLocal()
     try:
-        db = TestingSessionLocal()
         yield db
     finally:
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
+@pytest.fixture(scope="function")
+def client(db_session):
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
 
-
-@pytest.fixture(scope="module")
-def client(setup_database):
+    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c

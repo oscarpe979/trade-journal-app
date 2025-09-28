@@ -3,18 +3,28 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-IS_TESTING = os.getenv("TESTING", "false").lower() == "true"
+ENVIRONMENT = os.getenv("ENVIRONMENT")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 
-if IS_TESTING:
-    DATABASE_URL = "sqlite:///:memory:"
-else:
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable not set for production environment.")
+if ENVIRONMENT == 'production':
+    if not all([POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]):
+        raise ValueError("One or more PostgreSQL environment variables are not set.")
 
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
+DATABASE_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+
+
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
+
+# Creates a connection to the Production Database.
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
