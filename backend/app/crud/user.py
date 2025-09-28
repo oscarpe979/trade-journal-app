@@ -3,11 +3,7 @@ from sqlalchemy.orm import Session
 from ..models import User
 from ..schemas import user as user_schema
 from ..core.security import get_password_hash, verify_password
-
-
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
-
+from .base import get_user_by_email
 
 def create_user(db: Session, user: user_schema.UserCreate):
     hashed_password = get_password_hash(user.password)

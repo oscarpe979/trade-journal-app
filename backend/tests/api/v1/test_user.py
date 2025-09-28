@@ -112,32 +112,32 @@ def test_login_for_access_token_invalid_form_data(client: TestClient):
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY # FastAPI expects form data
 
-# # III. Protected Routes Tests
-# def test_read_users_me_success(client: TestClient):
-#     email = "me_success@example.com"
-#     password = "mepassword"
-#     token = get_user_token(client, email, password)
+# III. Protected Routes Tests
+def test_read_users_me_success(client: TestClient):
+    email = "me_success@example.com"
+    password = "mepassword"
+    token = get_user_token(client, email, password)
 
-#     response = client.get(
-#         "/api/v1/users/me",
-#         headers={"Authorization": f"Bearer {token}"},
-#     )
-#     assert response.status_code == status.HTTP_200_OK
-#     data = response.json()
-#     assert data["email"] == email
-#     assert "id" in data
+    response = client.get(
+        "/api/v1/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["email"] == email
+    assert "id" in data
 
-# def test_read_users_me_no_token(client: TestClient):
-#     response = client.get(
-#         "/api/v1/users/me",
-#     )
-#     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-#     assert response.json() == {"detail": "Not authenticated"}
+def test_read_users_me_no_token(client: TestClient):
+    response = client.get(
+        "/api/v1/users/me",
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Not authenticated"}
 
-# def test_read_users_me_invalid_token(client: TestClient):
-#     response = client.get(
-#         "/api/v1/users/me",
-#         headers={"Authorization": "Bearer invalid_token"},
-#     )
-#     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-#     assert response.json() == {"detail": "Could not validate credentials"}
+def test_read_users_me_invalid_token(client: TestClient):
+    response = client.get(
+        "/api/v1/users/me",
+        headers={"Authorization": "Bearer invalid_token"},
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Could not validate credentials"}

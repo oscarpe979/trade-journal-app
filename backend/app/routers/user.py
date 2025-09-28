@@ -7,19 +7,10 @@ from ..crud import user as crud_user
 from .. import models
 from ..schemas import user as user_schema
 from ..core import security
-from ..database.database import SessionLocal, engine
+from ..database.database import get_db
 
 
 router = APIRouter()
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.post("/users", response_model=user_schema.User)
 def create_user(user: user_schema.UserCreate, db: Session = Depends(get_db)):
@@ -43,3 +34,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/users/me", response_model=user_schema.User)
+def read_users_me(current_user: user_schema.User = Depends(security.get_current_user)):
+    return current_user
