@@ -9,10 +9,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
   backend:
     build: ./backend
+    env_file:
+      - ./.env
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/app:/app
+      - ./backend:/app
     depends_on:
       - db
 
