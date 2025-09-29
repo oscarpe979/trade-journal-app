@@ -203,7 +203,3 @@ body {
   font-size: 0.8em;
   margin-top: 5px;
 }
-
-.form-input.error {
-  border-color: #ff6b6b;
-}
