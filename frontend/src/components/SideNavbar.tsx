@@ -1,9 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './SideNavbar.css';
-import { FaTachometerAlt, FaBook, FaPlus, FaSignOutAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaCalendarAlt, FaChartBar, FaBook, FaFileUpload, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 
 const SideNavbar: React.FC = () => {
+  const { logout } = useAuth();
+
   return (
     <div className="side-navbar">
       <div className="navbar-logo">
@@ -14,25 +17,31 @@ const SideNavbar: React.FC = () => {
           <FaTachometerAlt />
           <span>Dashboard</span>
         </NavLink>
+        <NavLink to="/calendar" className="navbar-link">
+          <FaCalendarAlt />
+          <span>Calendar</span>
+        </NavLink>
+        <NavLink to="/reports" className="navbar-link">
+          <FaChartBar />
+          <span>Reports</span>
+        </NavLink>
         <NavLink to="/trades" className="navbar-link">
           <FaBook />
           <span>Trades</span>
         </NavLink>
-        <NavLink to="/journal" className="navbar-link">
-          <FaBook />
-          <span>Journal</span>
-        </NavLink>
-        <NavLink to="/new-trade" className="navbar-link">
-          <FaPlus />
-          <span>New Trade</span>
-        </NavLink>
       </nav>
+      <div className="navbar-import">
+        <button className="import-trades-button">
+          <FaFileUpload />
+          <span>Import Trades</span>
+        </button>
+      </div>
       <div className="navbar-user">
         <div className="user-info">
           <img src="https://via.placeholder.com/40" alt="User Avatar" />
           <span>oscarpe97</span>
         </div>
-        <button className="logout-button">
+        <button onClick={logout} className="logout-button">
           <FaSignOutAlt />
         </button>
       </div>

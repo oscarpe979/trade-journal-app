@@ -76,3 +76,31 @@
   font-size: 20px;
   cursor: pointer;
 }
+
+.navbar-import {
+  margin-bottom: 20px;
+}
+
+.import-trades-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 15px 10px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.import-trades-button:hover {
+  background-color: #218838;
+}
+
+.import-trades-button svg {
+  margin-right: 10px;
+  font-size: 20px;
+}

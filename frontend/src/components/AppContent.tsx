@@ -2,6 +2,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import SignUpPage from '../pages/SignUpPage';
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
+import CalendarPage from '../pages/CalendarPage';
+import ReportsPage from '../pages/ReportsPage';
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 import SideNavbar from './SideNavbar';
@@ -22,6 +24,18 @@ function AppContent() {
           <Route path="/dashboard"element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/calendar"element={
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/reports"element={
+              <ProtectedRoute>
+                <ReportsPage />
               </ProtectedRoute>
             }
           />
