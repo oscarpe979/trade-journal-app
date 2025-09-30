@@ -5,7 +5,7 @@ import { FaTachometerAlt, FaCalendarAlt, FaChartBar, FaBook, FaFileUpload, FaSig
 import { useAuth } from '../contexts/AuthContext';
 
 const SideNavbar: React.FC = () => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="side-navbar">
@@ -38,10 +38,9 @@ const SideNavbar: React.FC = () => {
       </div>
       <div className="navbar-user">
         <div className="user-info">
-          <img src="https://via.placeholder.com/40" alt="User Avatar" />
-          <span>oscarpe97</span>
+          <span>{user ? user.email : ''}</span>
         </div>
-        <button onClick={logout} className="logout-button">
+        <button onClick={logout} className="logout-button" title='Log Out'>
           <FaSignOutAlt />
         </button>
       </div>

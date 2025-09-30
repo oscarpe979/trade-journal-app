@@ -10,7 +10,9 @@
 .navbar-logo {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #292a4a;
 }
 
 .navbar-logo a {
@@ -27,11 +29,10 @@
 .navbar-link {
   display: flex;
   align-items: center;
-  padding: 15px 10px;
+  padding: 8px 10px;
   color: #e0e0e0;
   text-decoration: none;
   border-radius: 5px;
-  margin-bottom: 10px;
   transition: background-color 0.3s;
 }
 
@@ -53,7 +54,6 @@
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: 20px;
   border-top: 1px solid #292a4a;
 }
 
