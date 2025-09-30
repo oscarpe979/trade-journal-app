@@ -1,0 +1,78 @@
+.side-navbar {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+  padding: 20px;
+}
+
+.navbar-logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.navbar-logo a {
+  color: #e0e0e0;
+  text-decoration: none;
+}
+
+.navbar-links {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.navbar-link {
+  display: flex;
+  align-items: center;
+  padding: 15px 10px;
+  color: #e0e0e0;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.navbar-link:hover {
+  background-color: #292a4a;
+}
+
+.navbar-link.active {
+  background-color: #0f3460;
+}
+
+.navbar-link svg {
+  margin-right: 15px;
+  font-size: 20px;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #292a4a;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-info img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 20px;
+  cursor: pointer;
+}

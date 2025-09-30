@@ -1,42 +1,16 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import SignUpPage from './pages/SignUpPage';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import { BrowserRouter } from 'react-router-dom';
 import './App.css';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
+import AppContent from './components/AppContent';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/"
-            element={
-              <AuthRedirect /> // New component to handle root path redirection
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* Add other routes here as needed */}
-        </Routes>
+        <AppContent />
       </AuthProvider>
     </BrowserRouter>
   );
 }
-
-const AuthRedirect: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
-};
 
 export default App;
