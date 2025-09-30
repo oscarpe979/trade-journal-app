@@ -1,13 +1,16 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database.database import Base, engine
-from .routers import user
+from .routers import user, trades
 
-# Create the database tables
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+if os.environ.get("ENVIRONMENT") == "production":
+    print("Creating production database tables...")
+    Base.metadata.create_all(bind=engine)
 
 # Set up CORS
 origins = [
@@ -25,3 +28,4 @@ app.add_middleware(
 )
 
 app.include_router(user.router, prefix="/api/v1", tags=["users"])
+app.include_router(trades.router, prefix="/api/v1", tags=["trades"])
