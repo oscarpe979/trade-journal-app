@@ -2,3 +2,4 @@ pytest
 httpx
 email-validator
 pytest-env
+pandas

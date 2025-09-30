@@ -2,19 +2,23 @@ from fastapi.testclient import TestClient
 from starlette import status
 
 # Helper function to create a user and get their token
-def get_user_token(client: TestClient, email: str, password: str) -> str:
+def get_user_token(client: TestClient, email: str, password: str) -> tuple[str, int]:
     # Create user
-    client.post(
+    response = client.post(
         "/api/v1/users/",
         json={"email": email, "password": password},
     )
+    assert response.status_code == status.HTTP_200_OK
+    user_id = response.json()["id"]
+
     # Login and get token
     response = client.post(
         "/api/v1/login/access-token",
         data={"username": email, "password": password},
     )
     assert response.status_code == status.HTTP_200_OK
-    return response.json()["access_token"]
+    token = response.json()["access_token"]
+    return token, user_id
 
 # I. User Registration Tests
 def test_create_user(client: TestClient):
@@ -116,7 +120,7 @@ def test_login_for_access_token_invalid_form_data(client: TestClient):
 def test_read_users_me_success(client: TestClient):
     email = "me_success@example.com"
     password = "mepassword"
-    token = get_user_token(client, email, password)
+    token, _ = get_user_token(client, email, password)
 
     response = client.get(
         "/api/v1/users/me",

@@ -8,3 +8,4 @@ pydantic[email]
 python-multipart
 SQLAlchemy
 psycopg2-binary
+pandas
