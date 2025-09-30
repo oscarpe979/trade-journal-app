@@ -16,9 +16,9 @@
 
 ## Sprint 2: Core Trade Management
 
-*   [To Do] **US4: User Story: "As a logged-in user, I want to manually enter a completed trade..."**
-    *   [To Do] **T9: Task: Define the Trade database model and schemas.**
-    *   [To Do] **T10: Task: Implement the trade creation endpoint.**
+*   [To Do] **US4: User Story: "As a logged-in user, I want to batch import trades from a CSV file."**
+    *   [To Do] **T9: Task: Define the Trade database model and schemas.** (This task remains mostly the same).
+    *   [To Do] **T10: Task: Implement CSV trade import (frontend and backend).** (This task now covers creating the UI for upload and the backend logic for processing the file).
 *   [To Do] **US5: User Story: "As a user, I want to view a list of all my past trades..."**
     *   [To Do] **T11: Task: Implement the trade viewing endpoint.**
     *   [To Do] **T12: Task: Create the frontend Trade Log component.**
