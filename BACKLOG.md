@@ -36,3 +36,5 @@
         *   [To Do] **T17: Task: Implement the Dashboard's "empty state".**
 *   [To Do] **Epic: Production Deployment**
     *   [To Do] **T18: Task: Configure hosting and environment variables.**
+*   [To Do] **US9: User Story: "As a user uploading a large number of trades, I want them to be processed in a batch for better performance."**
+    *   [To Do] **T19: Task: Refactor CSV upload to use batch database inserts.**
