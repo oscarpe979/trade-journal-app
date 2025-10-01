@@ -4,6 +4,7 @@ import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
 import CalendarPage from '../pages/CalendarPage';
 import ReportsPage from '../pages/ReportsPage';
+import TradesPage from '../pages/TradesPage';
 import { useAuth } from '../contexts/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 import SideNavbar from './SideNavbar';
@@ -36,6 +37,12 @@ function AppContent() {
           <Route path="/reports"element={
               <ProtectedRoute>
                 <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/trades"element={
+              <ProtectedRoute>
+                <TradesPage />
               </ProtectedRoute>
             }
           />

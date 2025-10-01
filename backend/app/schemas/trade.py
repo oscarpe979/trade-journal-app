@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime, date
 from typing import Optional
+import math
 
 class TradeBase(BaseModel):
     execution_time: datetime
@@ -17,6 +18,16 @@ class TradeBase(BaseModel):
     order_type: Optional[str] = None
     notes: Optional[str] = None
 
+    @field_validator('strike_price', 'price', 'net_price', mode='before')
+    @classmethod
+    def validate_float_fields(cls, field_value):
+        if field_value is None:
+            return field_value
+        if isinstance(field_value, float):
+            if math.isnan(field_value) or math.isinf(field_value):
+                return 0.0  # or None, depending on your business logic
+        return field_value
+
 class TradeCreate(TradeBase):
     pass
 
@@ -30,4 +41,4 @@ class Trade(TradeBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # replaces orm_mode in Pydantic v2

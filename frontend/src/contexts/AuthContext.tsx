@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import eventBus from '../services/eventBus';
 
 interface User {
   email: string;
@@ -43,6 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
   };
+
+  useEffect(() => {
+    eventBus.on('logout', logout);
+    return () => {
+      eventBus.remove('logout', logout);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated }}>

@@ -9,7 +9,6 @@ from .routers import user, trades
 app = FastAPI()
 
 if os.environ.get("ENVIRONMENT") == "production":
-    print("Creating production database tables...")
     Base.metadata.create_all(bind=engine)
 
 # Set up CORS

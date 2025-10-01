@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import './SideNavbar.css';
 import { FaTachometerAlt, FaCalendarAlt, FaChartBar, FaBook, FaFileUpload, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
+import { uploadTrades } from '../services/tradeService';
 
 const SideNavbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && user && token) {
+      try {
+        await uploadTrades(file, token);
+        alert('Trades uploaded successfully');
+      } catch (error) {
+        alert('Error uploading trades: ' + error );
+      }
+    }
+  };
 
   return (
     <div className="side-navbar">
@@ -31,10 +49,17 @@ const SideNavbar: React.FC = () => {
         </NavLink>
       </nav>
       <div className="navbar-import">
-        <button className="import-trades-button">
+        <button className="import-trades-button" onClick={handleImportClick}>
           <FaFileUpload />
           <span>Import Trades</span>
         </button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+          accept=".csv"
+        />
       </div>
       <div className="navbar-user">
         <div className="user-info">
