@@ -11,4 +11,4 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    trades = relationship("Trade", back_populates="owner")
+    orders = relationship("Order", back_populates="owner")

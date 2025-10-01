@@ -3,7 +3,7 @@ from datetime import datetime, date
 from typing import Optional
 import math
 
-class TradeBase(BaseModel):
+class OrderBase(BaseModel):
     execution_time: datetime
     spread: Optional[str] = None
     side: str
@@ -28,13 +28,13 @@ class TradeBase(BaseModel):
                 return 0.0  # or None, depending on your business logic
         return field_value
 
-class TradeCreate(TradeBase):
+class OrderCreate(OrderBase):
     pass
 
-class TradeUpdate(TradeBase):
+class OrderUpdate(OrderBase):
     pass
 
-class Trade(TradeBase):
+class Order(OrderBase):
     id: int
     user_id: int
     created_at: datetime

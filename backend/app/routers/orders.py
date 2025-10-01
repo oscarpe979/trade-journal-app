@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from app.database import database
 from app.core import security
-from app.schemas import trade as trade_schema
-from app.crud import trade as trade_crud
+from app.schemas import order as order_schema
+from app.crud import order as order_crud
 from app.models import user as user_model
 
 router = APIRouter()
@@ -16,8 +16,8 @@ EXPECTED_COLUMNS = [
     "Exp", "Strike", "Type", "Price", "Net Price", "Order Type"
 ]
 
-@router.post("/trades/upload", status_code=201)
-async def upload_trades_csv(
+@router.post("/orders/upload", status_code=201)
+async def upload_orders_csv(
     file: UploadFile = File(...),
     db: Session = Depends(database.get_db),
     current_user: user_model.User = Depends(security.get_current_user)
@@ -63,14 +63,14 @@ async def upload_trades_csv(
     df['quantity'] = df['quantity'].fillna(0).astype(int)
 
     for _, row in df.iterrows():
-        trade_data = trade_schema.TradeCreate(**row.to_dict())
-        trade_crud.create_trade(db=db, trade=trade_data, user_id=current_user.id)
+        order_data = order_schema.OrderCreate(**row.to_dict())
+        order_crud.create_order(db=db, order=order_data, user_id=current_user.id)
 
-    return {"message": f"{len(df)} trades have been successfully uploaded."}
+    return {"message": f"{len(df)} orders have been successfully uploaded."}
 
-@router.get("/trades", response_model=List[trade_schema.Trade])
-def get_trades(
+@router.get("/orders", response_model=List[order_schema.Order])
+def get_orders(
     db: Session = Depends(database.get_db),
     current_user: user_model.User = Depends(security.get_current_user)
 ):
-    return trade_crud.get_trades_by_user(db=db, user_id=current_user.id)
+    return order_crud.get_orders_by_user(db=db, user_id=current_user.id)

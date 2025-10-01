@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 from ..database.database import Base
 import datetime
 
-class Trade(Base):
-    __tablename__ = "trades"
+class Order(Base):
+    __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -26,4 +26,4 @@ class Trade(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
-    owner = relationship("User", back_populates="trades")
+    owner = relationship("User", back_populates="orders")

@@ -2,13 +2,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.crud import trade as trade_crud
+from app.crud import order as order_crud
 from tests.api.v1.test_user import get_user_token
 
 
-def test_upload_trades_csv_success(client: TestClient, db_session: Session):
+def test_upload_orders_csv_success(client: TestClient, db_session: Session):
     # 1. Create a user and get a token
-    email = "trade_tester@example.com"
+    email = "order_tester@example.com"
     password = "testpassword"
     token, user_id = get_user_token(client, email, password)
 
@@ -21,23 +21,23 @@ def test_upload_trades_csv_success(client: TestClient, db_session: Session):
 
     # 3. Upload the CSV file
     response = client.post(
-        "/api/v1/trades/upload",
+        "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
-        files={"file": ("trades.csv", csv_data, "text/csv")},
+        files={"file": ("orders.csv", csv_data, "text/csv")},
     )
 
     # 4. Assert the response
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {"message": "2 trades have been successfully uploaded."}
+    assert response.json() == {"message": "2 orders have been successfully uploaded."}
 
-    # 5. Verify trades in the database
-    user_trades = trade_crud.get_trades_by_user(db=db_session, user_id=user_id)
-    assert len(user_trades) == 2
-    assert user_trades[0].symbol == "AAPL"
-    assert user_trades[0].quantity == 1
-    assert user_trades[1].price == 11.0
+    # 5. Verify orders in the database
+    user_orders = order_crud.get_orders_by_user(db=db_session, user_id=user_id)
+    assert len(user_orders) == 2
+    assert user_orders[0].symbol == "AAPL"
+    assert user_orders[0].quantity == 1
+    assert user_orders[1].price == 11.0
 
-def test_upload_trades_csv_invalid_file_type(client: TestClient):
+def test_upload_orders_csv_invalid_file_type(client: TestClient):
     # 1. Create a user and get a token
     email = "invalid_file@example.com"
     password = "testpassword"
@@ -48,9 +48,9 @@ def test_upload_trades_csv_invalid_file_type(client: TestClient):
 
     # 3. Upload the file
     response = client.post(
-        "/api/v1/trades/upload",
+        "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
-        files={"file": ("trades.txt", invalid_file_data, "text/plain")},
+        files={"file": ("orders.txt", invalid_file_data, "text/plain")},
     )
 
     # 4. Assert the response
@@ -58,7 +58,7 @@ def test_upload_trades_csv_invalid_file_type(client: TestClient):
     assert response.json() == {"detail": "Invalid file type. Please upload a CSV file."}
 
 
-def test_upload_trades_csv_invalid_columns(client: TestClient):
+def test_upload_orders_csv_invalid_columns(client: TestClient):
     # 1. Create a user and get a token
     email = "invalid_columns@example.com"
     password = "testpassword"
@@ -72,9 +72,9 @@ def test_upload_trades_csv_invalid_columns(client: TestClient):
 
     # 3. Upload the CSV file
     response = client.post(
-        "/api/v1/trades/upload",
+        "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
-        files={"file": ("trades.csv", csv_data, "text/csv")},
+        files={"file": ("orders.csv", csv_data, "text/csv")},
     )
 
     # 4. Assert the response
@@ -82,7 +82,7 @@ def test_upload_trades_csv_invalid_columns(client: TestClient):
     assert "Invalid CSV format" in response.json()["detail"]
 
 
-def test_upload_trades_csv_unauthenticated(client: TestClient):
+def test_upload_orders_csv_unauthenticated(client: TestClient):
     # 2. Prepare the CSV data
     csv_data = (
         "Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type\n"
@@ -91,8 +91,8 @@ def test_upload_trades_csv_unauthenticated(client: TestClient):
 
     # 3. Upload the CSV file without authentication
     response = client.post(
-        "/api/v1/trades/upload",
-        files={"file": ("trades.csv", csv_data, "text/csv")},
+        "/api/v1/orders/upload",
+        files={"file": ("orders.csv", csv_data, "text/csv")},
     )
 
     # 4. Assert the response
