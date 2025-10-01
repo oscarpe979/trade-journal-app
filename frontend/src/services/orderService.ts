@@ -1,11 +1,11 @@
 import api from './api';
 
-export const uploadTrades = async (file: File, token: string) => {
+export const uploadOrders = async (file: File, token: string) => {
   const formData = new FormData();
   formData.append('file', file);
 
   try {
-    const response = await api.post('/trades/upload', formData, {
+    const response = await api.post('/orders/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
@@ -13,19 +13,19 @@ export const uploadTrades = async (file: File, token: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error uploading trades:', error);
+    console.error('Error uploading orders:', error);
   }
 };
 
-export const getTrades = async (token: string) => {
+export const getOrders = async (token: string) => {
   try {
-    const response = await api.get('/trades', {
+    const response = await api.get('/orders', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching trades:', error);
+    console.error('Error fetching orders:', error);
   }
 };

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import './SideNavbar.css';
 import { FaTachometerAlt, FaCalendarAlt, FaChartBar, FaBook, FaFileUpload, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadTrades } from '../services/tradeService';
+import { uploadOrders } from '../services/orderService';
 
 const SideNavbar: React.FC = () => {
   const { user, logout, token } = useAuth();
@@ -17,10 +17,10 @@ const SideNavbar: React.FC = () => {
     const file = event.target.files?.[0];
     if (file && user && token) {
       try {
-        await uploadTrades(file, token);
-        alert('Trades uploaded successfully');
+        await uploadOrders(file, token);
+        alert('Orders uploaded successfully');
       } catch (error) {
-        alert('Error uploading trades: ' + error );
+        alert('Error uploading orders: ' + error );
       }
     }
   };

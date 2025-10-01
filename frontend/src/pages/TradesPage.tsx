@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getTrades } from '../services/tradeService';
+import { getOrders } from '../services/orderService';
 import { useAuth } from '../contexts/AuthContext';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
@@ -65,7 +65,7 @@ const darkTheme = createTheme({
   },
 });
 
-interface Trade {
+interface Order {
   id: number;
   execution_time: string;
   spread?: string;
@@ -83,7 +83,7 @@ interface Trade {
 
 const TradesPage: React.FC = () => {
   const { user, token } = useAuth();
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [trades, setTrades] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -91,13 +91,10 @@ const TradesPage: React.FC = () => {
       if (user && token) {
         try {
           setLoading(true);
-          const response = await getTrades(token);
-          //console.log('Raw response from backend:', response);
-          response.forEach((trade: Trade) => {
-            //console.log(`Trade ID: ${trade.id}, Price Type: ${typeof trade.price}, Price Value:`, trade.price);
-          });
+          const response = await getOrders(token);
+          
           // Transform dates to proper format for display
-          const formattedTrades = response.map((trade: Trade) => ({
+          const formattedTrades = response.map((trade: Order) => ({
             ...trade,
             execution_time: new Date(trade.execution_time).toLocaleString(),
             expiration_date: trade.expiration_date ? new Date(trade.expiration_date).toLocaleDateString() : '',
