@@ -12,3 +12,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     orders = relationship("Order", back_populates="owner")
+    trades = relationship("Trade", back_populates="owner")

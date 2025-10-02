@@ -1,10 +1,8 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+import os
 from .database.database import Base, engine
-from .routers import orders, user
-
+from .routers import orders, user, trades
 
 app = FastAPI()
 
@@ -28,3 +26,4 @@ app.add_middleware(
 
 app.include_router(user.router, prefix="/api/v1", tags=["users"])
 app.include_router(orders.router, prefix="/api/v1", tags=["orders"])
+app.include_router(trades.router, prefix="/api/v1", tags=["trades"])

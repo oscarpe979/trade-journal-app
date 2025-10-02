@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Date, Float, Text, For
 from sqlalchemy.orm import relationship
 from ..database.database import Base
 import datetime
+from .trade_order import trade_orders
 
 class Order(Base):
     __tablename__ = "orders"
@@ -27,3 +28,4 @@ class Order(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     owner = relationship("User", back_populates="orders")
+    trades = relationship("Trade", secondary=trade_orders, back_populates="orders")

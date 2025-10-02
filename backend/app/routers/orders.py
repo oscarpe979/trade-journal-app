@@ -8,6 +8,7 @@ from app.core import security
 from app.schemas import order as order_schema
 from app.crud import order as order_crud
 from app.models import user as user_model
+from app.services import trade_service
 
 router = APIRouter()
 
@@ -62,11 +63,16 @@ async def upload_orders_csv(
     # Convert quantity to integer, filling missing with 0
     df['quantity'] = df['quantity'].fillna(0).astype(int)
 
+    new_orders = []
     for _, row in df.iterrows():
         order_data = order_schema.OrderCreate(**row.to_dict())
-        order_crud.create_order(db=db, order=order_data, user_id=current_user.id)
+        db_order = order_crud.create_order(db=db, order=order_data, user_id=current_user.id)
+        new_orders.append(db_order)
 
-    return {"message": f"{len(df)} orders have been successfully uploaded."}
+    # Process the new orders to create or update trades
+    trade_service.process_new_orders(db=db, user_id=current_user.id, new_orders=new_orders)
+
+    return {"message": f"{len(df)} orders have been successfully uploaded and processed."}
 
 @router.get("/orders", response_model=List[order_schema.Order])
 def get_orders(

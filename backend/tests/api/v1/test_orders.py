@@ -28,7 +28,7 @@ def test_upload_orders_csv_success(client: TestClient, db_session: Session):
 
     # 4. Assert the response
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json() == {"message": "2 orders have been successfully uploaded."}
+    assert response.json() == {"message": "2 orders have been successfully uploaded and processed."}
 
     # 5. Verify orders in the database
     user_orders = order_crud.get_orders_by_user(db=db_session, user_id=user_id)
