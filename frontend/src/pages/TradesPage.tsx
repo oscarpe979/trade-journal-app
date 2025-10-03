@@ -6,6 +6,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { Box, Paper, Typography, Button, ThemeProvider, createTheme } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
+import type { Order} from '../types';
 
 const darkTheme = createTheme({
   palette: {
@@ -64,22 +65,6 @@ const darkTheme = createTheme({
     borderRadius: 8,
   },
 });
-
-interface Order {
-  id: number;
-  execution_time: string;
-  spread?: string;
-  side: string;
-  quantity: number;
-  position_effect: string;
-  symbol: string;
-  expiration_date?: string;
-  strike_price?: number;
-  option_type?: string;
-  price: number;
-  net_price: number;
-  order_type?: string;
-}
 
 const TradesPage: React.FC = () => {
   const { user, token } = useAuth();

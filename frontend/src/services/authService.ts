@@ -2,7 +2,13 @@ import api from './api';
 import type { UserLogin, UserCreate } from '../types';
 
 export const login = async (credentials: UserLogin) => {
-  const response = await api.post('/login/access-token', new URLSearchParams(credentials), {
+
+  const params = new URLSearchParams();
+  Object.entries(credentials).forEach(([key, value]) => {
+    params.append(key, String(value));
+  });
+  
+  const response = await api.post('/login/access-token', params, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
