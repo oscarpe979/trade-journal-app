@@ -15,8 +15,8 @@ def test_upload_orders_csv_success(client: TestClient, db_session: Session):
     # 2. Prepare the CSV data
     csv_data = (
         "Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type\n"
-        "2025-09-30 10:00:00,SINGLE,BUY,1,TO OPEN,AAPL,2025-10-10,150,C,10.5,10.5,LIMIT\n"
-        "2025-09-30 10:05:00,SINGLE,SELL,1,TO CLOSE,AAPL,2025-10-10,150,C,11.0,11.0,LIMIT\n"
+        "2025-09-30 10:00:00,STOCK,BUY,1,TO OPEN,AAPL,,,STOCK,10.5,10.5,LMT\n"
+        "2025-09-30 10:05:00,STOCK,SELL,1,TO CLOSE,AAPL,,,STOCK,11.0,11.0,LMT\n"
     )
 
     # 3. Upload the CSV file

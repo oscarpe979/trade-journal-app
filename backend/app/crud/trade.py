@@ -16,6 +16,13 @@ def get_open_trade_by_symbol(db: Session, user_id: int, symbol: str):
         trade_model.Trade.status == 'OPEN'
     ).first()
 
+def get_open_trades_by_symbols(db: Session, user_id: int, symbols: list[str]):
+    return db.query(trade_model.Trade).filter(
+        trade_model.Trade.user_id == user_id,
+        trade_model.Trade.symbol.in_(symbols),
+        trade_model.Trade.status == 'OPEN'
+    ).all()
+
 def create_trade(db: Session, trade: trade_schema.TradeCreate, orders: list[order_model.Order], user_id: int):
     db_trade = trade_model.Trade(**trade.model_dump(), user_id=user_id)
     db_trade.orders.extend(orders)

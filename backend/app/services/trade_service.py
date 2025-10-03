@@ -4,116 +4,134 @@ from app.schemas import trade as trade_schema
 from app.models import order as order_model
 from app.models import trade as trade_model
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def process_new_orders(db: Session, user_id: int, new_orders: list[order_model.Order]):
-    # Group orders by symbol
-    orders_by_symbol = {}
+    logger.info("--- Starting in-memory processing of new orders ---")
+
+    # 1. Get unique symbols and fetch all relevant open trades in one go
+    symbols = list(set(o.symbol for o in new_orders))
+    open_trades_from_db = trade_crud.get_open_trades_by_symbols(db, user_id=user_id, symbols=symbols)
+    
+    # 2. Create an in-memory map for active trades being processed, initially populated with current open trades from DB if any.
+    trades_map = {trade.symbol: trade for trade in open_trades_from_db}
+    closed_trades = []
+    
+    # 3. Sort orders chronologically
+    new_orders.sort(key=lambda o: o.execution_time)
+
+    # 4. Process each order in memory
     for order in new_orders:
-        if order.symbol not in orders_by_symbol:
-            orders_by_symbol[order.symbol] = []
-        orders_by_symbol[order.symbol].append(order)
+        logger.info(f"Processing order in-memory: {order.id}, {order.symbol}, {order.side}, {order.quantity}")
+        trade = trades_map.get(order.symbol)
 
-    for symbol, symbol_orders in orders_by_symbol.items():
-        # Sort orders by execution time to process them in order
-        symbol_orders.sort(key=lambda o: o.execution_time)
+        if order.position_effect == 'TO OPEN':
+            direction = 'LONG' if order.side == 'BUY' else 'SHORT'
+            if trade:
+                if trade.status == 'CLOSED':
+                    # This should not happen if the logic is correct
+                    logger.error(f"Found a closed trade in the trades_map for symbol {order.symbol}")
+                    # I will create a new trade anyway
+                    new_trade = _create_new_trade(order, user_id)
+                    trades_map[order.symbol] = new_trade
+                elif trade.direction == direction:
+                    # Add to existing open trade
+                    _update_trade_with_order(trade, order)
+                else:
+                    logger.error(
+                        f"Data anomaly: Received a 'TO OPEN' order (ID: {order.id}) for {order.symbol} "
+                        f"with direction {direction}, but an open trade (ID: {trade.id}) "
+                        f"already exists in the opposite direction ({trade.direction}). "
+                        f"This order will be ignored."
+                    )
+            else:
+                # No trade for this symbol, create a new one
+                new_trade = _create_new_trade(order, user_id)
+                trades_map[order.symbol] = new_trade
         
-        db_trade = trade_crud.get_open_trade_by_symbol(db, user_id=user_id, symbol=symbol)
+        elif order.position_effect == 'TO CLOSE':
+            if trade:
+                _update_trade_with_order(trade, order)
+                if _close_trade_if_fully_exited(trade):
+                    closed_trades.append(trade)
+                    del trades_map[order.symbol]
+            else:
+                logger.warning(f"Orphan closing order found (no open trade): {order.id} for {order.symbol}")
 
-        if not db_trade:
-            # Create a new trade if one doesn't exist
-            # Find the first opening order to start the trade
-            try:
-                first_order = next(o for o in symbol_orders if o.position_effect == 'TO OPEN')
-                symbol_orders.remove(first_order)
-            except StopIteration:
-                # If there are no opening orders in the new batch, we can't start a trade.
-                # This could be closing orders for a trade opened in a previous session.
-                # The current logic assumes that if a trade is open, it exists in the DB.
-                # This case needs to be handled if we want to open and close in different uploads
-                # and the open trade is not yet in the DB.
-                # For now, we will assume the first upload for a symbol contains an opening order.
-                continue
+    # 5. Batch save all changes to the database
+    logger.info("--- Committing all changes to the database ---")
+    for symbol, trade in trades_map.items():
+        db.merge(trade)
 
-            direction = 'LONG' if first_order.side == 'BUY' else 'SHORT'
+    for trade in closed_trades:
+        db.merge(trade)
+    
+    db.commit()
+    logger.info("--- Database commit successful ---")
 
-            trade_create = trade_schema.TradeCreate(
-                symbol=symbol,
-                status='OPEN',
-                direction=direction,
-                volume=first_order.quantity,
-                avg_entry_price=first_order.price,
-                entry_timestamp=first_order.execution_time,
-                executions_count=1,
-                notes=""
-            )
-            db_trade = trade_crud.create_trade(db, trade=trade_create, orders=[first_order], user_id=user_id)
+def _create_new_trade(order: order_model.Order, user_id: int) -> trade_model.Trade:
+    logger.info(f"Creating new trade object in-memory for {order.symbol}")
+    direction = 'LONG' if order.side == 'BUY' else 'SHORT'
+    
+    # Create a new ORM model instance directly
+    new_trade = trade_model.Trade(
+        symbol=order.symbol,
+        user_id=user_id,
+        status='OPEN',
+        direction=direction,
+        volume=order.quantity,
+        avg_entry_price=order.price,
+        entry_timestamp=order.execution_time,
+        executions_count=1,
+        orders=[order]
+    )
+    return new_trade
 
-        # Process remaining orders for the symbol
-        for order in symbol_orders:
-            update_trade_with_order(db, db_trade, order)
+def _update_trade_with_order(trade: trade_model.Trade, order: order_model.Order):
+    logger.info(f"Updating trade in-memory for {trade.symbol} with order {order.id}")
+    
+    trade.orders.append(order)
+    trade.executions_count += 1
 
-        # After processing all orders for the symbol, check if the trade is closed
-        check_and_close_trade(db, db_trade)
-
-def update_trade_with_order(db: Session, db_trade: trade_model.Trade, order: order_model.Order):
     # Recalculate trade properties
     total_entry_qty = 0
     total_entry_value = 0
-    
-    # It's better to append the order to the session's object list before recalculating
-    db_trade.orders.append(order)
-    db_trade.executions_count += 1
-
-    for o in db_trade.orders:
+    for o in trade.orders:
         if o.position_effect == 'TO OPEN':
-            total_entry_qty += o.quantity
-            total_entry_value += o.quantity * o.price
+            total_entry_qty += abs(o.quantity)
+            total_entry_value += abs(o.quantity * o.price)
 
     if total_entry_qty > 0:
-        db_trade.avg_entry_price = total_entry_value / total_entry_qty
-        db_trade.volume = total_entry_qty
+        trade.avg_entry_price = round(total_entry_value / total_entry_qty, 4)
+        trade.volume = total_entry_qty
 
-    # Create a TradeUpdate model with only the updated fields
-    trade_update_data = trade_schema.TradeUpdate(
-        avg_entry_price=db_trade.avg_entry_price,
-        volume=db_trade.volume,
-        executions_count=db_trade.executions_count
-    )
-    
-    trade_crud.update_trade(db, db_trade=db_trade, trade_update=trade_update_data)
+def _close_trade_if_fully_exited(trade: trade_model.Trade) -> bool:
+    logger.info(f"Checking to close trade in-memory for {trade.symbol}")
+    total_entry_qty = abs(sum(o.quantity for o in trade.orders if o.position_effect == 'TO OPEN'))
+    total_exit_qty = abs(sum(o.quantity for o in trade.orders if o.position_effect == 'TO CLOSE'))
 
-
-def check_and_close_trade(db: Session, db_trade: trade_model.Trade):
-    total_entry_qty = 0
-    total_exit_qty = 0
-    total_exit_value = 0
-
-    for o in db_trade.orders:
-        if o.position_effect == 'TO OPEN':
-            total_entry_qty += o.quantity
-        elif o.position_effect == 'TO CLOSE':
-            total_exit_qty += o.quantity
-            total_exit_value += o.quantity * o.price
+    logger.info(f"Trade {trade.symbol} quantities: entry={total_entry_qty}, exit={total_exit_qty}")
 
     if total_entry_qty == total_exit_qty and total_entry_qty > 0:
-        db_trade.status = 'CLOSED'
-        db_trade.exit_timestamp = db_trade.orders[-1].execution_time # Last order's time
+        logger.info(f"Closing trade in-memory for {trade.symbol}")
+        trade.status = 'CLOSED'
         
-        if total_exit_qty > 0:
-            db_trade.avg_exit_price = total_exit_value / total_exit_qty
-        
-        # Calculate PnL
-        if db_trade.direction == 'LONG':
-            pnl = (db_trade.avg_exit_price - db_trade.avg_entry_price) * db_trade.volume
-        else: # SHORT
-            pnl = (db_trade.avg_entry_price - db_trade.avg_exit_price) * db_trade.volume
-        
-        db_trade.pnl = pnl
+        # Find the latest execution time among closing orders for the exit timestamp
+        exit_orders = [o for o in trade.orders if o.position_effect == 'TO CLOSE']
+        trade.exit_timestamp = max(o.execution_time for o in exit_orders)
 
-        trade_update_data = trade_schema.TradeUpdate(
-            status=db_trade.status,
-            exit_timestamp=db_trade.exit_timestamp,
-            avg_exit_price=db_trade.avg_exit_price,
-            pnl=db_trade.pnl
-        )
-        trade_crud.update_trade(db, db_trade=db_trade, trade_update=trade_update_data)
+        total_exit_value = abs(sum(o.quantity * o.price for o in exit_orders))
+        if total_exit_qty > 0:
+            trade.avg_exit_price = total_exit_value / total_exit_qty
+        
+        if trade.direction == 'LONG':
+            pnl = round(((trade.avg_exit_price - trade.avg_entry_price) * trade.volume), 3)
+        else: # SHORT
+            pnl = round(((trade.avg_entry_price - trade.avg_exit_price) * trade.volume), 3)
+        
+        trade.pnl = pnl
+        return True
+    return False
