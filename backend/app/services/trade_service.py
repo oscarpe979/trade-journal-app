@@ -1,9 +1,7 @@
 from sqlalchemy.orm import Session
-from app.crud import trade as trade_crud
-from app.schemas import trade as trade_schema
-from app.models import order as order_model
-from app.models import trade as trade_model
-from datetime import datetime
+from ..crud import trade as trade_crud
+from ..models import order as order_model
+from ..models import trade as trade_model
 import logging
 
 logging.basicConfig(level=logging.INFO)
