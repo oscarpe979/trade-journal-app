@@ -8,36 +8,18 @@ from app.core import security
 from app.schemas import order as order_schema
 from app.crud import order as order_crud
 from app.models import user as user_model
-from app.services import trade_service
+from app.services import trade_service, file_processing_service
 
 router = APIRouter()
 
-EXPECTED_COLUMNS = [
-    "Exec Time", "Spread", "Side", "Qty", "Pos Effect", "Symbol",
-    "Exp", "Strike", "Type", "Price", "Net Price", "Order Type"
-]
-
 @router.post("/orders/upload", status_code=201)
-async def upload_orders_csv(
+async def upload_orders(
     file: UploadFile = File(...),
     db: Session = Depends(database.get_db),
     current_user: user_model.User = Depends(security.get_current_user)
 ):
-    if file.content_type != 'text/csv':
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a CSV file.")
+    df = file_processing_service.process_file(file)
 
-    contents = await file.read()
-    
-    try:
-        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error parsing CSV file: {e}")
-
-    if list(df.columns) != EXPECTED_COLUMNS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid CSV format. Columns must be exactly: {EXPECTED_COLUMNS}"
-        )
     # Rename columns to match the schema
     df.columns = [
         "execution_time", "spread", "side", "quantity", "position_effect", "symbol",

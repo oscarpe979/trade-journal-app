@@ -55,7 +55,7 @@ def test_upload_orders_csv_invalid_file_type(client: TestClient):
 
     # 4. Assert the response
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {"detail": "Invalid file type. Please upload a CSV file."}
+    assert response.json() == {"detail": "Invalid file type. Please upload a CSV or XLSX file."}
 
 
 def test_upload_orders_csv_invalid_columns(client: TestClient):

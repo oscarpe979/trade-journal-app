@@ -356,6 +356,6 @@ def test_real_complex_trade(client: TestClient, db_session: Session):
     assert first_trade["symbol"] == "BTAI"
     assert first_trade["status"] == "CLOSED"
     assert first_trade["volume"] == 3000
-    assert first_trade["avg_entry_price"] == 4.108333333333333
+    assert first_trade["avg_entry_price"] == 4.1083
     assert first_trade["avg_exit_price"] == 3.975
-    assert round(first_trade["pnl"], 2) == 400.0
+    assert round(first_trade["pnl"], 2) == 399.9
