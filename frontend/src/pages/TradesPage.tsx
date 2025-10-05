@@ -309,8 +309,8 @@ const TradesPage: React.FC = () => {
               },
               '& .MuiDataGrid-row': {
                 backgroundColor: 'transparent',
-                minHeight: '52px !important',
-                maxHeight: '52px !important',
+                minHeight: '45px !important',
+                maxHeight: '45px !important',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.04)',
                   cursor: 'pointer'
@@ -328,8 +328,8 @@ const TradesPage: React.FC = () => {
               '& .MuiDataGrid-footerContainer': {
                 borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                 backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                minHeight: '52px !important',
-                maxHeight: '52px !important',
+                minHeight: '45px !important',
+                maxHeight: '45px !important',
               },
               '& .MuiTablePagination-root': {
                 color: 'rgba(255, 255, 255, 0.7)',
