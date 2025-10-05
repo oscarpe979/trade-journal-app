@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { getOrders } from '../services/orderService';
+import { getTrades } from '../services/tradeService';
 import { useAuth } from '../contexts/AuthContext';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { Box, Paper, Typography, Button, ThemeProvider, createTheme } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
-import type { Order} from '../types';
+import type { Trade } from '../types';
+import OrdersModal from '../components/TradesGrid/OrdersModal';
 
 const darkTheme = createTheme({
   palette: {
@@ -68,25 +69,17 @@ const darkTheme = createTheme({
 
 const TradesPage: React.FC = () => {
   const { user, token } = useAuth();
-  const [trades, setTrades] = useState<Order[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
 
   useEffect(() => {
     const fetchTrades = async () => {
       if (user && token) {
         try {
           setLoading(true);
-          const response = await getOrders(token);
-          
-          // Transform dates to proper format for display
-          const formattedTrades = response.map((trade: Order) => ({
-            ...trade,
-            execution_time: new Date(trade.execution_time).toLocaleString(),
-            expiration_date: trade.expiration_date ? new Date(trade.expiration_date).toLocaleDateString() : '',
-            price: typeof trade.price === 'string' ? parseFloat(trade.price) : trade.price,
-            net_price: typeof trade.net_price === 'string' ? parseFloat(trade.net_price) : trade.net_price,
-          }));
-          setTrades(formattedTrades);
+          const response = await getTrades(token);
+          setTrades(response);
         } catch (error) {
           console.error('Error fetching trades:', error);
         } finally {
@@ -98,47 +91,18 @@ const TradesPage: React.FC = () => {
     fetchTrades();
   }, [user, token]);
 
+  const handleRowClick = (params: GridRowParams) => {
+    setSelectedTrade(params.row as Trade);
+  };
+
   const columns: GridColDef[] = [
     { 
-      field: 'execution_time', 
-      headerName: 'Exec Time', 
+      field: 'entry_timestamp', 
+      headerName: 'Entry Time', 
       width: 200,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-          {params.value}
-        </Typography>
-      )
-    },
-    { 
-      field: 'side', 
-      headerName: 'Side',
-      width: 100,
-      renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-          {params.value}
-        </Typography>
-      )
-    },
-    { 
-      field: 'quantity', 
-      headerName: 'Qty',
-      type: 'number',
-      width: 100,
-      align: 'right',
-      headerAlign: 'right',
-      renderCell: (params) => (
-        <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace' }}>
-          {params.value}
-        </Typography>
-      )
-    },
-    { 
-      field: 'position_effect', 
-      headerName: 'Pos Effect',
-      width: 120,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value}
+          {new Date(params.value).toLocaleString()}
         </Typography>
       )
     },
@@ -153,8 +117,8 @@ const TradesPage: React.FC = () => {
       )
     },
     { 
-      field: 'option_type', 
-      headerName: 'Type',
+      field: 'direction', 
+      headerName: 'Direction',
       width: 100,
       renderCell: (params) => (
         <Typography variant="body2">
@@ -163,14 +127,64 @@ const TradesPage: React.FC = () => {
       )
     },
     { 
-      field: 'price', 
-      headerName: 'Price',
+      field: 'status', 
+      headerName: 'Status',
+      width: 100,
+      renderCell: (params) => (
+        <Typography variant="body2">
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: 'volume', 
+      headerName: 'Volume',
+      type: 'number',
       width: 100,
       align: 'right',
       headerAlign: 'right',
       renderCell: (params) => (
         <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace' }}>
-          ${params.row.price.toFixed(2)}
+          {params.value}
+        </Typography>
+      )
+    },
+    { 
+      field: 'avg_entry_price', 
+      headerName: 'Avg Entry Price',
+      type: 'number',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace' }}>
+          ${params.value.toFixed(2)}
+        </Typography>
+      )
+    },
+    { 
+      field: 'avg_exit_price', 
+      headerName: 'Avg Exit Price',
+      type: 'number',
+      width: 150,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace' }}>
+          {params.value ? `${params.value.toFixed(2)}` : '-'}
+        </Typography>
+      )
+    },
+    { 
+      field: 'pnl', 
+      headerName: 'PNL',
+      type: 'number',
+      width: 120,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace', color: params.value >= 0 ? 'success.main' : 'error.main' }}>
+          {params.value ? `${params.value.toFixed(2)}` : '-'}
         </Typography>
       )
     }
@@ -200,7 +214,7 @@ const TradesPage: React.FC = () => {
               fontWeight: 500
             }}
           >
-            Trading Activity
+            Trades
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
@@ -254,6 +268,7 @@ const TradesPage: React.FC = () => {
             initialState={{
               pagination: { paginationModel: { pageSize: 25 } },
             }}
+            onRowClick={handleRowClick}
             sx={{
               border: 'none',
               color: 'text.primary',
@@ -298,6 +313,7 @@ const TradesPage: React.FC = () => {
                 maxHeight: '52px !important',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                  cursor: 'pointer'
                 },
                 '&.Mui-selected': {
                   backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -352,6 +368,7 @@ const TradesPage: React.FC = () => {
             }}
           />
         </Paper>
+        <OrdersModal trade={selectedTrade} onClose={() => setSelectedTrade(null)} />
       </Box>
     </ThemeProvider>
   );

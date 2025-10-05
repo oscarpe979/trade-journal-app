@@ -23,3 +23,20 @@ export interface Order {
   net_price: number;
   order_type?: string;
 }
+
+export interface Trade {
+  id: number;
+  user_id: number;
+  symbol: string;
+  status: 'OPEN' | 'CLOSED';
+  direction: 'LONG' | 'SHORT';
+  volume: number;
+  avg_entry_price: number;
+  avg_exit_price?: number;
+  entry_timestamp: string;
+  exit_timestamp?: string;
+  pnl?: number;
+  executions_count: number;
+  notes?: string;
+  orders: Order[];
+}
