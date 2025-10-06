@@ -16,6 +16,8 @@ const style = {
   width: '40%',
   minWidth: '700px',
   maxWidth: '1200px',
+  height: '80%',
+  maxHeight: '800px',
   bgcolor: '#1E293B',
   border: '1px solid #334155',
   borderRadius: '8px',
@@ -36,7 +38,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ trade, onClose }) => {
       aria-labelledby="trade-orders-modal-title"
       aria-describedby="trade-orders-modal-description"
     >
-      <Box sx={style}>
+      <Box sx={{ ...style, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography id="trade-orders-modal-title" variant="h6" component="h2">
             Trade Details
@@ -83,7 +85,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ trade, onClose }) => {
         </Box>
 
         <Typography variant="h6" sx={{ mb: 2, color: '#94A3B8' }}>Associated Orders</Typography>
-        <TableContainer component={Paper} sx={{ backgroundColor: '#0F172A', color: '#F8FAFC' }}>
+        <TableContainer component={Paper} sx={{ overflowY: 'auto', backgroundColor: '#0F172A', color: '#F8FAFC' }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
