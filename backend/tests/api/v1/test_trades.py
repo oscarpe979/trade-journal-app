@@ -10,6 +10,7 @@ def upload_orders(client: TestClient, token: str, csv_data: str):
         "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("orders.csv", csv_data, "text/csv")},
+        data={"timezone": "UTC"},
     )
 
 def test_get_trades_unauthenticated(client: TestClient):

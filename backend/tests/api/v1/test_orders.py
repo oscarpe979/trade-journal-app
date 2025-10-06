@@ -24,6 +24,7 @@ def test_upload_orders_csv_success(client: TestClient, db_session: Session):
         "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("orders.csv", csv_data, "text/csv")},
+        data={"timezone": "UTC"},
     )
 
     # 4. Assert the response
@@ -51,6 +52,7 @@ def test_upload_orders_csv_invalid_file_type(client: TestClient):
         "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("orders.txt", invalid_file_data, "text/plain")},
+        data={"timezone": "UTC"},
     )
 
     # 4. Assert the response
@@ -75,6 +77,7 @@ def test_upload_orders_csv_invalid_columns(client: TestClient):
         "/api/v1/orders/upload",
         headers={"Authorization": f"Bearer {token}"},
         files={"file": ("orders.csv", csv_data, "text/csv")},
+        data={"timezone": "UTC"},
     )
 
     # 4. Assert the response
