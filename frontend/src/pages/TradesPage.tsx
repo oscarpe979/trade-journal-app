@@ -8,6 +8,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import type { Trade } from '../types';
 import OrdersModal from '../components/TradesGrid/OrdersModal';
+import { formatToNY } from '../utils/dateUtils';
 
 const darkTheme = createTheme({
   palette: {
@@ -102,7 +103,7 @@ const TradesPage: React.FC = () => {
       width: 200,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-          {new Date(params.value).toLocaleString()}
+          {formatToNY(params.value)}
         </Typography>
       )
     },

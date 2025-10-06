@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Grid } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Trade, Order } from '../../types';
+import { formatToNY } from '../../utils/dateUtils';
 
 interface OrdersModalProps {
   trade: Trade | null;
@@ -107,7 +108,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ trade, onClose }) => {
                     },
                   }}
                 >
-                  <TableCell sx={{ color: '#F8FAFC' }}>{new Date(order.execution_time).toLocaleString()}</TableCell>
+                  <TableCell sx={{ color: '#F8FAFC' }}>{formatToNY(order.execution_time)}</TableCell>
                   <TableCell sx={{ color: '#F8FAFC' }}>{order.side}</TableCell>
                   <TableCell sx={{ color: '#F8FAFC' }}>{order.quantity}</TableCell>
                   <TableCell sx={{ color: '#F8FAFC' }}>{order.position_effect}</TableCell>

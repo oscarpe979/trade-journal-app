@@ -10,7 +10,7 @@ class Order(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     
-    execution_time = Column(DateTime, nullable=False)
+    execution_time = Column(DateTime(timezone=True), nullable=False)
     spread = Column(String, nullable=True)
     side = Column(String, nullable=False)
     quantity = Column(Integer, nullable=False)

@@ -1,29 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import './SideNavbar.css';
 import { FaTachometerAlt, FaCalendarAlt, FaChartBar, FaBook, FaFileUpload, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadOrders } from '../services/orderService';
+import ImportTradesModal from './ImportTradesModal';
 
 const SideNavbar: React.FC = () => {
-  const { user, logout, token } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && user && token) {
-      try {
-        await uploadOrders(file, token);
-        alert('Orders uploaded successfully');
-      } catch (error) {
-        alert('Error uploading orders: ' + error );
-      }
-    }
-  };
+  const { user, logout } = useAuth();
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   return (
     <div className="side-navbar">
@@ -49,17 +33,10 @@ const SideNavbar: React.FC = () => {
         </NavLink>
       </nav>
       <div className="navbar-import">
-        <button className="import-trades-button" onClick={handleImportClick}>
+        <button className="import-trades-button" onClick={() => setImportModalOpen(true)}>
           <FaFileUpload />
           <span>Import Trades</span>
         </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-          accept=".csv"
-        />
       </div>
       <div className="navbar-user">
         <div className="user-info">
@@ -69,6 +46,7 @@ const SideNavbar: React.FC = () => {
           <FaSignOutAlt />
         </button>
       </div>
+      <ImportTradesModal open={isImportModalOpen} onClose={() => setImportModalOpen(false)} />
     </div>
   );
 };

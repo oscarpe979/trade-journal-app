@@ -1,7 +1,7 @@
 import pandas as pd
 import io
 from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form
 from sqlalchemy.orm import Session
 from app.database import database
 from app.core import security
@@ -15,6 +15,7 @@ router = APIRouter()
 @router.post("/orders/upload", status_code=201)
 async def upload_orders(
     file: UploadFile = File(...),
+    timezone: str = Form(...),
     db: Session = Depends(database.get_db),
     current_user: user_model.User = Depends(security.get_current_user)
 ):
@@ -33,7 +34,7 @@ async def upload_orders(
             raise HTTPException(status_code=400, detail=f"Missing values in required column: '{col}'")
 
     # Convert date columns
-    df['execution_time'] = pd.to_datetime(df['execution_time'])
+    df['execution_time'] = pd.to_datetime(df['execution_time']).dt.tz_localize(timezone).dt.tz_convert('UTC')
     df['expiration_date'] = pd.to_datetime(df['expiration_date']).dt.date
 
     # Replace NaT with None for nullable date fields

@@ -1,8 +1,9 @@
 import api from './api';
 
-export const uploadOrders = async (file: File, token: string) => {
+export const uploadOrders = async (file: File, timezone: string, token: string) => {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('timezone', timezone);
 
   try {
     const response = await api.post('/orders/upload', formData, {

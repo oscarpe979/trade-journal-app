@@ -17,7 +17,7 @@ class Trade(Base):
     avg_entry_price = Column(Float, nullable=False)
     avg_exit_price = Column(Float, nullable=True)
 
-    entry_timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    entry_timestamp = Column(DateTime(timezone=True))
     exit_timestamp = Column(DateTime(timezone=True), nullable=True)
     
     pnl = Column(Float, nullable=True)

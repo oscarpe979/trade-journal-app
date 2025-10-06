@@ -6,6 +6,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.disabled = True
 
 def process_new_orders(db: Session, user_id: int, new_orders: list[order_model.Order]):
     logger.info("--- Starting in-memory processing of new orders ---")
