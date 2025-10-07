@@ -361,6 +361,7 @@ def test_real_complex_trade(client: TestClient, db_session: Session):
     assert round(first_trade["avg_exit_price"],3) == 3.975
     assert round(first_trade["pnl"], 1) == 400.0
 
+
 def test_upload_orders_xlsx_with_missing_values(client: TestClient):
     # 1. Create a user and get a token
     email = "xlsx_missing_values@example.com"
@@ -379,3 +380,50 @@ def test_upload_orders_xlsx_with_missing_values(client: TestClient):
     # 3. Assert the response
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Missing values in required column: Side"}
+def test_trade_closed_across_separate_files(client: TestClient, db_session: Session):
+    # 1. Create a user and get a token
+    email = "separate_files@example.com"
+    password = "testpassword"
+    token, user_id = get_user_token(client, email, password)
+
+    # 2. Upload the first file with the opening order
+    csv_data_open = (
+        "Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type\n"
+        "2025-10-08 10:00:00,STOCK,BUY,10,TO OPEN,MSFT,,,STOCK,100.0,100.0,LMT\n"
+    )
+    upload_response_open = upload_orders(client, token, csv_data_open)
+    assert upload_response_open.status_code == status.HTTP_201_CREATED
+
+    # 3. Verify the trade is open
+    response_open = client.get("/api/v1/trades", headers={"Authorization": f"Bearer {token}"})
+    assert response_open.status_code == status.HTTP_200_OK
+    trades_open = response_open.json()
+    assert len(trades_open) == 1
+    trade_open = trades_open[0]
+    assert trade_open["symbol"] == "MSFT"
+    assert trade_open["status"] == "OPEN"
+    assert trade_open["volume"] == 10
+    assert trade_open["avg_entry_price"] == 100.0
+    assert trade_open["avg_exit_price"] is None
+    assert trade_open["pnl"] is None
+
+    # 4. Upload the second file with the closing order
+    csv_data_close = (
+        "Exec Time,Spread,Side,Qty,Pos Effect,Symbol,Exp,Strike,Type,Price,Net Price,Order Type\n"
+        "2025-10-09 10:00:00,STOCK,SELL,10,TO CLOSE,MSFT,,,STOCK,110.0,110.0,LMT\n"
+    )
+    upload_response_close = upload_orders(client, token, csv_data_close)
+    assert upload_response_close.status_code == status.HTTP_201_CREATED
+
+    # 5. Verify the trade is closed
+    response_closed = client.get("/api/v1/trades", headers={"Authorization": f"Bearer {token}"})
+    assert response_closed.status_code == status.HTTP_200_OK
+    trades_closed = response_closed.json()
+    assert len(trades_closed) == 1
+    trade_closed = trades_closed[0]
+    assert trade_closed["symbol"] == "MSFT"
+    assert trade_closed["status"] == "CLOSED"
+    assert trade_closed["volume"] == 10
+    assert trade_closed["avg_entry_price"] == 100.0
+    assert trade_closed["avg_exit_price"] == 110.0
+    assert trade_closed["pnl"] == 100.0
