@@ -360,3 +360,22 @@ def test_real_complex_trade(client: TestClient, db_session: Session):
     assert first_trade["avg_entry_price"] == 4.1083
     assert first_trade["avg_exit_price"] == 3.975
     assert round(first_trade["pnl"], 2) == 399.9
+
+def test_upload_orders_xlsx_with_missing_values(client: TestClient):
+    # 1. Create a user and get a token
+    email = "xlsx_missing_values@example.com"
+    password = "testpassword"
+    token, _ = get_user_token(client, email, password)
+
+    # 2. Upload the XLSX file with missing values
+    with open("backend/tests/data/test_missing_values.xlsx", "rb") as f:
+        response = client.post(
+            "/api/v1/orders/upload",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": ("test_missing_values.xlsx", f, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            data={"timezone": "UTC"},
+        )
+
+    # 3. Assert the response
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Missing values in required column: Side"}

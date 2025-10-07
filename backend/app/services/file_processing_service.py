@@ -90,6 +90,12 @@ def _process_xlsx(file: UploadFile) -> pd.DataFrame:
             
     data_df = data_df[EXPECTED_COLUMNS]
 
+    # Check for missing values in required columns
+    required_cols = [col for col in EXPECTED_COLUMNS if col not in ['Exp', 'Strike']]
+    for col in required_cols:
+        if data_df[col].isnull().any():
+            raise HTTPException(status_code=400, detail=f"Missing values in required column: {col}")
+
     return data_df
 
 def process_file(file: UploadFile) -> pd.DataFrame:
