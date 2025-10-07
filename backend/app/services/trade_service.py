@@ -99,7 +99,7 @@ def _update_trade_with_order(trade: trade_model.Trade, order: order_model.Order)
             total_entry_value += abs(o.quantity * o.price)
 
     if total_entry_qty > 0:
-        trade.avg_entry_price = round(total_entry_value / total_entry_qty, 4)
+        trade.avg_entry_price = round(total_entry_value / total_entry_qty, 5)
         trade.volume = total_entry_qty
 
 def _close_trade_if_fully_exited(trade: trade_model.Trade) -> bool:
@@ -122,9 +122,9 @@ def _close_trade_if_fully_exited(trade: trade_model.Trade) -> bool:
             trade.avg_exit_price = total_exit_value / total_exit_qty
         
         if trade.direction == 'LONG':
-            pnl = round(((trade.avg_exit_price - trade.avg_entry_price) * trade.volume), 3)
+            pnl = round(((trade.avg_exit_price - trade.avg_entry_price) * trade.volume), 5)
         else: # SHORT
-            pnl = round(((trade.avg_entry_price - trade.avg_exit_price) * trade.volume), 3)
+            pnl = round(((trade.avg_entry_price - trade.avg_exit_price) * trade.volume), 5)
         
         trade.pnl = pnl
         return True
