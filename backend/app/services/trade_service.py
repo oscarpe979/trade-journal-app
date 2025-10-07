@@ -34,7 +34,7 @@ def process_new_orders(db: Session, user_id: int, new_orders: list[order_model.O
                     # This should not happen if the logic is correct
                     logger.error(f"Found a closed trade in the trades_map for symbol {order.symbol}")
                     # I will create a new trade anyway
-                    new_trade = _create_new_trade(order, user_id)
+                    new_trade = _create_new_trade(db, order, user_id)
                     trades_map[order.symbol] = new_trade
                 elif trade.direction == direction:
                     # Add to existing open trade
@@ -48,7 +48,7 @@ def process_new_orders(db: Session, user_id: int, new_orders: list[order_model.O
                     )
             else:
                 # No trade for this symbol, create a new one
-                new_trade = _create_new_trade(order, user_id)
+                new_trade = _create_new_trade(db, order, user_id)
                 trades_map[order.symbol] = new_trade
         
         elif order.position_effect == 'TO CLOSE':
@@ -62,16 +62,10 @@ def process_new_orders(db: Session, user_id: int, new_orders: list[order_model.O
 
     # 5. Batch save all changes to the database
     logger.info("--- Committing all changes to the database ---")
-    for symbol, trade in trades_map.items():
-        db.merge(trade)
-
-    for trade in closed_trades:
-        db.merge(trade)
-    
     db.commit()
     logger.info("--- Database commit successful ---")
 
-def _create_new_trade(order: order_model.Order, user_id: int) -> trade_model.Trade:
+def _create_new_trade(db: Session, order: order_model.Order, user_id: int) -> trade_model.Trade:
     logger.info(f"Creating new trade object in-memory for {order.symbol}")
     direction = 'LONG' if order.side == 'BUY' else 'SHORT'
     
@@ -84,9 +78,10 @@ def _create_new_trade(order: order_model.Order, user_id: int) -> trade_model.Tra
         volume=order.quantity,
         avg_entry_price=order.price,
         entry_timestamp=order.execution_time,
-        executions_count=1,
-        orders=[order]
+        executions_count=1
     )
+    db.add(new_trade)
+    new_trade.orders.append(order)
     return new_trade
 
 def _update_trade_with_order(trade: trade_model.Trade, order: order_model.Order):
