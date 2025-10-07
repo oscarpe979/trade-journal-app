@@ -3,9 +3,7 @@ import { getTrades } from '../services/tradeService';
 import { useAuth } from '../contexts/AuthContext';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { Box, Paper, Typography, Button, ThemeProvider, createTheme } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import AddIcon from '@mui/icons-material/Add';
+import { Box, Paper, Typography, ThemeProvider, createTheme, Chip } from '@mui/material';
 import type { Trade } from '../types';
 import OrdersModal from '../components/TradesGrid/OrdersModal';
 import { formatToNY } from '../utils/dateUtils';
@@ -130,12 +128,14 @@ const TradesPage: React.FC = () => {
     { 
       field: 'status', 
       headerName: 'Status',
-      width: 100,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value}
-        </Typography>
-      )
+      width: 120,
+      renderCell: (params) => {
+        const status = params.value;
+
+        return (
+          <Chip variant='outlined' label={status} color={status == 'CLOSED' ? 'info' : "warning"} size="small"/>
+        );
+      }
     },
     { 
       field: 'volume', 
@@ -172,20 +172,20 @@ const TradesPage: React.FC = () => {
       headerAlign: 'right',
       renderCell: (params) => (
         <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace' }}>
-          {params.value ? `${params.value.toFixed(2)}` : '-'}
+          ${params.value ? `${params.value.toFixed(2)}` : '-'}
         </Typography>
       )
     },
     { 
       field: 'pnl', 
-      headerName: 'PNL',
+      headerName: 'P&L',
       type: 'number',
       width: 120,
       align: 'right',
       headerAlign: 'right',
       renderCell: (params) => (
         <Typography variant="body2" sx={{ width: '100%', textAlign: 'right', fontFamily: 'monospace', color: params.value >= 0 ? 'success.main' : 'error.main' }}>
-          {params.value ? `${params.value.toFixed(2)}` : '-'}
+          ${params.value ? `${params.value.toFixed(2)}` : '-'}
         </Typography>
       )
     }
@@ -194,14 +194,14 @@ const TradesPage: React.FC = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ 
-        flexGrow: 1,
-        overflow: 'auto', 
+        height: 'inherit', 
+        flexGrow: 1,        
         p: 3,
         bgcolor: 'background.default'
       }}>
         {/* Title section with actions */}
         <Box sx={{ 
-          display: 'flex', 
+          display: 'flex',
           justifyContent: 'space-between', 
           alignItems: 'center', 
           mb: 3 
@@ -217,36 +217,6 @@ const TradesPage: React.FC = () => {
           >
             Trades
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<DownloadIcon />}
-              sx={{ 
-                borderColor: 'primary.light',
-                color: 'primary.light',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  bgcolor: 'rgba(144, 202, 249, 0.08)'
-                }
-              }}
-            >
-              Export
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              sx={{ 
-                bgcolor: 'primary.dark',
-                '&:hover': {
-                  bgcolor: 'primary.main'
-                }
-              }}
-            >
-              New Trade
-            </Button>
-          </Box>
         </Box>
 
         {/* Main content */}
@@ -258,7 +228,7 @@ const TradesPage: React.FC = () => {
             borderRadius: 0,
             overflow: 'hidden',
             bgcolor: 'background.paper',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
+            border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
           <DataGrid
@@ -266,6 +236,7 @@ const TradesPage: React.FC = () => {
             columns={columns}
             loading={loading}
             pageSizeOptions={[10, 25, 50, 100]}
+            autoHeight
             initialState={{
               pagination: { paginationModel: { pageSize: 25 } },
             }}
@@ -279,8 +250,9 @@ const TradesPage: React.FC = () => {
               },
               '& .MuiDataGrid-cell': {
                 borderColor: 'rgba(255, 255, 255, 0.08)',
-                py: 1.5,
                 px: 2,
+                display: 'flex',
+                alignItems: 'center',
                 '&:focus': {
                   outline: 'none',
                 },
@@ -310,8 +282,6 @@ const TradesPage: React.FC = () => {
               },
               '& .MuiDataGrid-row': {
                 backgroundColor: 'transparent',
-                minHeight: '45px !important',
-                maxHeight: '45px !important',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.04)',
                   cursor: 'pointer'
@@ -354,8 +324,7 @@ const TradesPage: React.FC = () => {
                 }
               }
             }}
-            autoHeight
-            density="comfortable"
+            rowHeight={45}
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
             slots={{

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Grid } from '@mui/material';
+import { Box, Typography, Modal, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Grid, Chip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Trade, Order } from '../../types';
 import { formatToNY } from '../../utils/dateUtils';
@@ -62,7 +62,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ trade, onClose }) => {
             </Grid>
             <Grid>
               <Typography variant="body2" sx={{ color: '#94A3B8' }}>Status</Typography>
-              <Typography variant="body1">{trade.status}</Typography>
+              <Chip variant='outlined' label={trade.status} color={trade.status == 'CLOSED' ? 'info' : "warning"} size="small" sx={{ mt: 0.5 }}/>
             </Grid>
             <Grid>
               <Typography variant="body2" sx={{ color: '#94A3B8' }}>Volume</Typography>
