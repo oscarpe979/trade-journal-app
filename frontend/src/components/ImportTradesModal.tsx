@@ -65,11 +65,9 @@ const ImportTradesModal: React.FC<ImportTradesModalProps> = ({ open, onClose }) 
 
     try {
       await uploadOrders(selectedFile, selectedTimezone, token);
-      alert('File uploaded successfully!');
       onClose(); // Close modal on success
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred.');
-      alert(`Error uploading file: ${err.message || 'An unexpected error occurred.'}`);
     } finally {
       setLoading(false);
     }

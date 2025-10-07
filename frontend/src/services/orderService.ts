@@ -15,6 +15,7 @@ export const uploadOrders = async (file: File, timezone: string, token: string) 
     return response.data;
   } catch (error) {
     console.error('Error uploading orders:', error);
+    throw error;
   }
 };
 
@@ -28,5 +29,6 @@ export const getOrders = async (token: string) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching orders:', error);
+    throw error;
   }
 };
